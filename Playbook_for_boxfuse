@@ -1,0 +1,39 @@
+---
+- name: Deploy boxfuse
+  hosts: localhost
+  become: yes
+
+  tasks:
+  - name: Ensure tomcat package is present
+    apt:
+     name: tomcat8
+     state: present
+
+  - name: Clone repo
+    git:
+     repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+     dest: /home/home_work/boxfuse-sample-java-war-hello
+     clone: yes
+
+  - name: Ensure maven package is present
+    apt:
+     name: maven
+     state: present
+
+  - name: Ensure JDK package is present
+    apt:
+     name: default-jdk
+     state: present
+
+  - name: Building war
+    command: mvn -f /home/home_work/boxfuse-sample-java-war-hello/pom.xml package
+
+  - name: Copying files to WebApps
+    copy:
+      src: /home/home_work/boxfuse-sample-java-war-hello/target/hello-1.0.war
+      dest: /var/lib/tomcat8/webapps/
+
+  - name: Ensure tomcat is starting
+    service:
+     name: tomcat8
+     state: started
